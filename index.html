@@ -365,10 +365,13 @@ const toast = msg => {
   clearTimeout(toastTm); toastTm=setTimeout(()=>el.classList.remove('show'),3000);
 };
 
+let currentScreen = '';
 const showScreen = id => {
+  if (currentScreen === id) return; // já na tela certa, não faz nada
+  currentScreen = id;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('screen-'+id).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'instant'});
 };
 
 // sessão
