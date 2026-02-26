@@ -147,11 +147,27 @@ body::after{content:'';position:fixed;inset:0;z-index:1;
 /* GAME LAYOUT — tudo numa coluna no mobile */
 .game-layout{display:flex;flex-direction:column;gap:1rem}
 
-/* CHAT */
-.chat-tabs{display:flex;border-bottom:1px solid rgba(0,245,255,.1)}
+/* CHAT — botão flutuante + drawer fixo no mobile */
+/* Botão para abrir chat (só aparece no mobile) */
+.chat-fab{display:none;position:fixed;bottom:1.5rem;right:1.25rem;z-index:500;width:52px;height:52px;border-radius:50%;background:rgba(4,8,16,.95);border:2px solid var(--cyan);color:var(--cyan);font-size:1.4rem;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(0,245,255,.35),0 4px 20px rgba(0,0,0,.6);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;transition:transform .15s}
+.chat-fab:active{transform:scale(.9)}
+.chat-fab .fab-badge{position:absolute;top:-4px;right:-4px;background:var(--pink);color:#fff;font-family:'Orbitron',monospace;font-size:.5rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 8px var(--pink)}
+.chat-fab .fab-badge.show{display:flex}
+
+/* Drawer: ocupa tela toda acima do teclado no mobile */
+.chat-drawer{display:none;position:fixed;left:0;right:0;bottom:0;z-index:600;background:rgba(4,8,16,.98);border-top:2px solid rgba(0,245,255,.3);flex-direction:column;max-height:70vh;transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.chat-drawer.open{display:flex}
+.chat-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;border-bottom:1px solid rgba(0,245,255,.1);flex-shrink:0}
+.chat-drawer-title{font-family:'Orbitron',monospace;font-size:.65rem;font-weight:700;letter-spacing:.15em;color:var(--cyan);text-transform:uppercase}
+.chat-drawer-close{background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;padding:.2rem .5rem;touch-action:manipulation;line-height:1}
+
+/* Tabs */
+.chat-tabs{display:flex;border-bottom:1px solid rgba(0,245,255,.1);flex-shrink:0}
 .chat-tab{flex:1;padding:.5rem .4rem;font-family:'Orbitron',monospace;font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:var(--dim);transition:color .2s;touch-action:manipulation}
 .chat-tab.active{color:var(--cyan);border-bottom:2px solid var(--cyan);text-shadow:0 0 8px var(--cyan)}
-.chat-msgs{overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.35rem;height:220px;scrollbar-width:thin;scrollbar-color:rgba(0,245,255,.2) transparent}
+
+/* Messages */
+.chat-msgs{overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.35rem;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(0,245,255,.2) transparent}
 .chat-msgs::-webkit-scrollbar{width:3px}
 .chat-msgs::-webkit-scrollbar-thumb{background:rgba(0,245,255,.2);border-radius:2px}
 .chat-msg{padding:.35rem .55rem;border-radius:2px;font-size:.85rem;animation:msgIn .2s ease;line-height:1.4}
@@ -162,7 +178,9 @@ body::after{content:'';position:fixed;inset:0;z-index:1;
 .msg-author{font-family:'Orbitron',monospace;font-size:.52rem;font-weight:700;letter-spacing:.08em;margin-bottom:.15rem}
 .msg-author.me{color:var(--cyan)}.msg-author.them{color:var(--pink)}
 .msg-text{color:var(--text);font-weight:600}
-.chat-input-row{display:flex;gap:.4rem;padding:.6rem;border-top:1px solid rgba(0,245,255,.08);align-items:center}
+
+/* Input row — fixo no fundo, sobe com o teclado via JS */
+.chat-input-row{display:flex;gap:.4rem;padding:.6rem;border-top:1px solid rgba(0,245,255,.08);align-items:center;flex-shrink:0;background:rgba(4,8,16,.98)}
 .chat-input-row input{flex:1;padding:.5rem .65rem;background:rgba(0,245,255,.03);border:1px solid rgba(0,245,255,.12);border-radius:2px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:600;outline:none;-webkit-appearance:none;appearance:none;caret-color:var(--cyan)}
 .chat-input-row input::placeholder{color:rgba(224,244,255,.12)}
 .chat-input-row input:focus{border-color:rgba(0,245,255,.3);background:rgba(0,245,255,.05)}
@@ -224,10 +242,18 @@ body::after{content:'';position:fixed;inset:0;z-index:1;
 .mt{margin-top:.65rem}.mt2{margin-top:1rem}.center{text-align:center}
 .empty-state{text-align:center;font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.18em;color:var(--dim);padding:1.25rem;text-transform:uppercase;animation:dotP 2s ease-in-out infinite}
 
+@media(max-width:699px){
+  /* No mobile: esconde o painel de chat inline, mostra FAB */
+  .game-layout > div:last-child > .panel{ display:none !important; }
+  .chat-fab{ display:flex; }
+}
 @media(min-width:700px){
   .lobby-grid{gap:1.25rem}
   .game-layout{display:grid;grid-template-columns:1fr 300px;gap:1.25rem;align-items:start}
   .chat-msgs{height:300px}
+  /* No desktop: chat inline normal, sem drawer/FAB */
+  .chat-drawer{ display:none !important; }
+  .chat-fab{ display:none !important; }
   .hud-timer{font-size:3.5rem}
   .letter-ring{width:120px;height:120px}
   .letter-char{font-size:5rem}
@@ -349,10 +375,10 @@ body::after{content:'';position:fixed;inset:0;z-index:1;
             <button class="chat-tab" id="tab-voice" onclick="switchTab('voice')">🎙️ Voz</button>
           </div>
           <div id="chat-text" style="display:flex;flex-direction:column;flex:1">
-            <div class="chat-msgs" id="chat-msgs"></div>
+            <div class="chat-msgs" id="chat-msgs-desktop"></div>
             <div class="chat-input-row">
-              <input type="text" id="chat-inp" placeholder="mensagem..." maxlength="120" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat()}">
-              <button class="btn btn-cyan btn-icon" onclick="sendChat()">▶</button>
+              <input type="text" id="chat-inp-desktop" placeholder="mensagem..." maxlength="120" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat('desktop')}">
+              <button class="btn btn-cyan btn-icon" onclick="sendChat('desktop')">▶</button>
             </div>
           </div>
           <div id="chat-voice" style="display:none;flex-direction:column;flex:1;align-items:center;justify-content:center;gap:1rem;padding:1.25rem">
@@ -367,6 +393,24 @@ body::after{content:'';position:fixed;inset:0;z-index:1;
     </div>
   </div>
 </div>
+
+<!-- FAB chat (mobile only) -->
+<button class="chat-fab" id="chat-fab" onclick="openChatDrawer()">
+  💬
+  <div class="fab-badge" id="fab-badge">0</div>
+</button>
+
+<!-- Chat Drawer (mobile only) -->
+<div class="chat-drawer" id="chat-drawer">
+  <div class="chat-drawer-header">
+    <span class="chat-drawer-title">💬 Chat</span>
+    <button class="chat-drawer-close" onclick="closeChatDrawer()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs-mobile"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chat-inp-mobile" placeholder="mensagem..." maxlength="120" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat('mobile')}">
+    <button class="btn btn-cyan btn-icon" onclick="sendChat('mobile')">▶</button>
+  </div>
 
 <!-- RESULTS -->
 <div id="screen-results" class="screen">
@@ -650,29 +694,93 @@ window.switchTab = tab => {
   $('chat-voice').style.display = tab === 'voice' ? 'flex' : 'none';
 };
 
-window.sendChat = async () => {
-  const inp = $('chat-inp');
+let chatDrawerOpen = false;
+let unreadCount = 0;
+
+window.openChatDrawer = () => {
+  chatDrawerOpen = true;
+  $('chat-drawer').classList.add('open');
+  unreadCount = 0;
+  const badge = $('fab-badge');
+  badge.textContent = '0';
+  badge.classList.remove('show');
+  // Foca o input depois da animação
+  setTimeout(() => {
+    $('chat-inp-mobile')?.focus();
+    const msgs = $('chat-msgs-mobile');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }, 50);
+};
+
+window.closeChatDrawer = () => {
+  chatDrawerOpen = false;
+  $('chat-drawer').classList.remove('open');
+  // Fecha teclado
+  $('chat-inp-mobile')?.blur();
+};
+
+// Sobe o drawer quando o teclado abre (visualViewport API)
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const drawer = $('chat-drawer');
+    if (!drawer || !chatDrawerOpen) return;
+    const vv = window.visualViewport;
+    const offsetFromBottom = window.innerHeight - vv.height - vv.offsetTop;
+    drawer.style.bottom = Math.max(0, offsetFromBottom) + 'px';
+  });
+  window.visualViewport.addEventListener('scroll', () => {
+    const drawer = $('chat-drawer');
+    if (!drawer || !chatDrawerOpen) return;
+    const vv = window.visualViewport;
+    const offsetFromBottom = window.innerHeight - vv.height - vv.offsetTop;
+    drawer.style.bottom = Math.max(0, offsetFromBottom) + 'px';
+  });
+}
+
+window.sendChat = async (src) => {
+  const inp = src === 'mobile' ? $('chat-inp-mobile') : $('chat-inp-desktop');
+  if (!inp) return;
   const txt = inp.value.trim();
   if (!txt || !gs.roomId) return;
   inp.value = '';
+  inp.focus();
   await set(push(ref(db, `rooms/${gs.roomId}/chat`)), { pid, name: gs.name, text: txt, ts: Date.now() });
 };
 
 function renderChatMsgs(data) {
-  const msgs = $('chat-msgs');
-  if (!msgs) return;
   const entries = Object.entries(data).filter(([k]) => k !== '_').map(([,v]) => v).sort((a,b) => (a.ts||0)-(b.ts||0));
-  msgs.innerHTML = '';
-  entries.forEach(v => {
-    const isMe = v.pid === pid, isSys = v.sys;
-    const div = document.createElement('div');
-    div.className = 'chat-msg ' + (isSys ? 'sys' : isMe ? 'me' : 'them');
-    if (!isSys) {
-      div.innerHTML = `<div class="msg-author ${isMe?'me':'them'}">${esc(v.name)}</div><div class="msg-text">${esc(v.text)}</div>`;
-    } else { div.textContent = v.text; }
-    msgs.appendChild(div);
-  });
-  msgs.scrollTop = msgs.scrollHeight;
+
+  const buildMsgs = (container) => {
+    if (!container) return;
+    const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 40;
+    container.innerHTML = '';
+    entries.forEach(v => {
+      const isMe = v.pid === pid, isSys = v.sys;
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + (isSys ? 'sys' : isMe ? 'me' : 'them');
+      if (!isSys) {
+        div.innerHTML = `<div class="msg-author ${isMe?'me':'them'}">${esc(v.name)}</div><div class="msg-text">${esc(v.text)}</div>`;
+      } else { div.textContent = v.text; }
+      container.appendChild(div);
+    });
+    if (wasAtBottom) container.scrollTop = container.scrollHeight;
+  };
+
+  buildMsgs($('chat-msgs-desktop'));
+  buildMsgs($('chat-msgs-mobile'));
+
+  // Badge de não lidos quando drawer fechado
+  if (!chatDrawerOpen && window.innerWidth < 700) {
+    const lastEntry = entries[entries.length - 1];
+    if (lastEntry && lastEntry.pid !== pid) {
+      unreadCount++;
+      const badge = $('fab-badge');
+      if (badge) {
+        badge.textContent = unreadCount > 9 ? '9+' : String(unreadCount);
+        badge.classList.add('show');
+      }
+    }
+  }
 }
 
 // ── VOICE CHAT ────────────────────────────────────────────────
@@ -984,6 +1092,15 @@ if (gs.name) $('inp-name').value = gs.name;
 tryReconnect(false).then(ok => {
   if (!ok) showScreen('home');
 });
+
+// Fecha drawer ao tocar fora
+document.addEventListener('touchstart', e => {
+  const drawer = $('chat-drawer');
+  const fab = $('chat-fab');
+  if (chatDrawerOpen && drawer && !drawer.contains(e.target) && !fab?.contains(e.target)) {
+    closeChatDrawer();
+  }
+}, { passive: true });
 </script>
 </body>
 </html>
